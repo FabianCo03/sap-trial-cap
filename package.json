@@ -1,0 +1,54 @@
+{
+  "name": "trial-cap",
+  "version": "1.0.0",
+  "description": "A simple CAP project.",
+  "repository": "<Add your repository here>",
+  "license": "UNLICENSED",
+  "private": true,
+  "config": {
+    "commitizen": {
+      "path": "git-cz"
+    }
+  },
+  "dependencies": {
+    "@cap-js-community/odata-v2-adapter": "^1.15.1",
+    "@cap-js/hana": "^1.9.1",
+    "@sap-cloud-sdk/connectivity": "^4.0.2",
+    "@sap-cloud-sdk/http-client": "^4.0.2",
+    "@sap-cloud-sdk/resilience": "^4.0.2",
+    "@sap-cloud-sdk/util": "^4.0.2",
+    "@sap/cds": "^8.9.4",
+    "@sap/hana-client": "^2.25.22",
+    "@sap/xssec": "^4.8.0",
+    "cds-swagger-ui-express": "^0.10.0",
+    "express": "^4.21.2",
+    "rimraf": "^6.0.1"
+  },
+  "devDependencies": {
+    "@cap-js/cds-types": "^0.10.0",
+    "@cap-js/sqlite": "^1",
+    "@sap/cds-dk": "^8",
+    "git-cz": "^4.9.0"
+  },
+  "scripts": {
+    "start": "cds-serve",
+    "build": "rimraf resources mta_archives && mbt build --mtar archive",
+    "deploy": "cf deploy mta_archives/archive.mtar --retries 0",
+    "dev": "cds watch  --profile hybrid"
+  },
+  "cds": {
+    "db": {
+      "kind": "hana"
+    },
+    "requires": {
+      "[production]": {
+        "auth": "xsuaa"
+      },
+      "connectivity": true,
+      "destinations": true
+    },
+    "sql": {
+      "native_hana_associations": false
+    }
+  }
+}
