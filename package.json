@@ -28,13 +28,17 @@
     "@cap-js/cds-types": "^0.10.0",
     "@cap-js/sqlite": "^1",
     "@sap/cds-dk": "^8",
-    "git-cz": "^4.9.0"
+    "git-cz": "^4.9.0",
+    "rimraf": "^5.0.5",
+    "mbt": "^1.2.29"
   },
   "scripts": {
     "start": "cds-serve",
     "build": "rimraf resources mta_archives && mbt build --mtar archive",
-    "deploy": "cf deploy mta_archives/archive.mtar --retries 0",
-    "dev": "cds watch  --profile hybrid"
+    "deploy": "cf deploy mta_archives/archive.mtar --retries 1",
+    "dev": "cds watch  --profile hybrid",
+    "watch-ui5-app": "cds watch --open ui5-app/webapp/index.html?sap-ui-xx-viewCache=false",
+    "undeploy": "cf undeploy trial-cap --delete-services --delete-service-keys --delete-service-brokers"
   },
   "cds": {
     "db": {
@@ -45,7 +49,9 @@
         "auth": "xsuaa"
       },
       "connectivity": true,
-      "destinations": true
+      "destinations": true,
+      "html5-runtime": true,
+      "workzone": true
     },
     "sql": {
       "native_hana_associations": false
