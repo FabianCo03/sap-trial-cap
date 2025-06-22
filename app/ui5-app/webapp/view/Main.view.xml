@@ -1,6 +1,31 @@
-<mvc:View controllerName="ormobtp.ui5app.controller.Main"
+<mvc:View
+    controllerName="ormobtp.ui5app.controller.Main"
     xmlns:mvc="sap.ui.core.mvc"
-    xmlns="sap.m">
-    <Page id="page" title="{i18n>title}">
+    xmlns="sap.m"
+    xmlns:smartTable="sap.ui.comp.smarttable"
+>
+    <Page
+        id="page"
+        title="{i18n>title}"
+    >
+        <smartTable:SmartTable
+            id="tbl2"
+            entitySet="Books"
+            initiallyVisibleFields="ID,title,stock"
+            smartFilterId="smartFilterBarCAP"
+            tableType="ResponsiveTable"
+            enableExport="true"
+            useVariantManagement="true"
+            useTablePersonalisation="true"
+            header="{i18n>0002}"
+            showRowCount="true"
+            persistencyKey="SmartTableAnalytical_Explored"
+            enableAutoBinding="true"
+            demandPopin="true"
+            class="sapUiResponsiveContentPadding"
+            showDetailsButton="true"
+            enableAutoColumnWidth="false"
+            editTogglable="false"
+        />
     </Page>
 </mvc:View>
