@@ -3,184 +3,184 @@ ID: trial-cap
 description: A simple CAP project.
 version: 1.0.0
 modules:
-- name: trial-cap-srv
-  type: nodejs
-  path: gen/srv
-  requires:
-  - name: trial-cap-auth
-  - name: trial-cap-db
-  - name: trial-cap-connectivity
-  - name: trial-cap-destination
-  provides:
-  - name: srv-api
-    properties:
-      srv-url: ${default-url}
-  parameters:
-    buildpack: nodejs_buildpack
-    instances: 1
-  build-parameters:
-    builder: npm-ci
-- name: trial-cap-db-deployer
-  type: hdb
-  path: gen/db
-  requires:
-  - name: trial-cap-db
-    properties:
-      TARGET_CONTAINER: ~{hdi-container-name}
-  parameters:
-    buildpack: nodejs_buildpack
-- name: trial-cap
-  type: approuter.nodejs
-  path: app/router
-  requires:
-  - name: srv-api
-    group: destinations
-    properties:
-      forwardAuthToken: true
-      name: srv-api
-      url: ~{srv-url}
-  - name: trial-cap-auth
-  - name: trial-cap-destination
-  - name: trial-cap-html5-runtime
-  provides:
-  - name: app-api
-    properties:
-      app-protocol: ${protocol}
-      app-uri: ${default-uri}
-  parameters:
-    disk-quota: 256M
-    keep-existing-routes: true
-    memory: 256M
-- name: trial-cap-app-deployer
-  type: com.sap.application.content
-  path: gen
-  requires:
-  - name: trial-cap-html5-repo-host
-    parameters:
-      content-target: true
-  build-parameters:
-    build-result: app/
+  - name: trial-cap-srv
+    type: nodejs
+    path: gen/srv
     requires:
-    - artifacts:
-      - ormobtpui5app.zip
-      name: ormobtpui5app
-      target-path: app/
-- name: trial-cap-destinations
-  type: com.sap.application.content
-  requires:
-  - name: trial-cap-auth
+      - name: trial-cap-auth
+      - name: trial-cap-db
+      - name: trial-cap-connectivity
+      - name: trial-cap-destination
+    provides:
+      - name: srv-api
+        properties:
+          srv-url: ${default-url}
     parameters:
-      service-key:
-        name: trial-cap-auth-key
-  - name: trial-cap-html5-repo-host
+      buildpack: nodejs_buildpack
+      instances: 1
+    build-parameters:
+      builder: npm-ci
+  - name: trial-cap-db-deployer
+    type: hdb
+    path: gen/db
+    requires:
+      - name: trial-cap-db
+        properties:
+          TARGET_CONTAINER: ~{hdi-container-name}
     parameters:
-      service-key:
-        name: trial-cap-html5-repo-host-key
-  - name: srv-api
-  - name: trial-cap-destination
+      buildpack: nodejs_buildpack
+  - name: trial-cap
+    type: approuter.nodejs
+    path: app/router
+    requires:
+      - name: srv-api
+        group: destinations
+        properties:
+          forwardAuthToken: true
+          name: srv-api
+          url: ~{srv-url}
+      - name: trial-cap-auth
+      - name: trial-cap-destination
+      - name: trial-cap-html5-runtime
+    provides:
+      - name: app-api
+        properties:
+          app-protocol: ${protocol}
+          app-uri: ${default-uri}
     parameters:
-      content-target: true
-  parameters:
-    content:
-      instance:
-        destinations:
-        - Name: trial-cap-html5-repository
-          ServiceInstanceName: trial-cap-html5-repo-host
-          ServiceKeyName: trial-cap-html5-repo-host-key
-          sap.cloud.service: trialcap.service
-        - Authentication: OAuth2UserTokenExchange
-          Name: trial-cap-auth
-          ServiceInstanceName: trial-cap-auth
-          ServiceKeyName: trial-cap-auth-key
-          sap.cloud.service: trialcap.service
-        existing_destinations_policy: update
-  build-parameters:
-    no-source: true
-- name: ormobtpui5app
-  type: html5
-  path: app/ui5-app
-  build-parameters:
-    build-result: dist
-    builder: custom
-    commands:
-    - npm install
-    - npm run build:cf
-    supported-platforms: []
-resources:
-- name: trial-cap-auth
-  type: org.cloudfoundry.managed-service
-  parameters:
-    config:
-      tenant-mode: dedicated
-      xsappname: trial-cap-${org}-${space}
-    path: ./xs-security.json
-    service: xsuaa
-    service-plan: application
-- name: trial-cap-db
-  type: com.sap.xs.hdi-container
-  parameters:
-    service: hana
-    service-plan: hdi-shared
-  properties:
-    hdi-container-name: ${service-name}
-- name: trial-cap-connectivity
-  type: org.cloudfoundry.managed-service
-  parameters:
-    service: connectivity
-    service-plan: lite
-- name: trial-cap-destination
-  type: org.cloudfoundry.managed-service
-  parameters:
-    config:
-      HTML5Runtime_enabled: true
-      init_data:
+      disk-quota: 256M
+      keep-existing-routes: true
+      memory: 256M
+  - name: trial-cap-app-deployer
+    type: com.sap.application.content
+    path: gen
+    requires:
+      - name: trial-cap-html5-repo-host
+        parameters:
+          content-target: true
+    build-parameters:
+      build-result: app/
+      requires:
+        - artifacts:
+            - ormobtpui5app.zip
+          name: ormobtpui5app
+          target-path: app/
+  - name: trial-cap-destinations
+    type: com.sap.application.content
+    requires:
+      - name: trial-cap-auth
+        parameters:
+          service-key:
+            name: trial-cap-auth-key
+      - name: trial-cap-html5-repo-host
+        parameters:
+          service-key:
+            name: trial-cap-html5-repo-host-key
+      - name: srv-api
+      - name: trial-cap-destination
+        parameters:
+          content-target: true
+    parameters:
+      content:
         instance:
           destinations:
-          - Authentication: NoAuthentication
-            HTML5.DynamicDestination: true
-            HTML5.ForwardAuthToken: true
-            Name: srv-api
-            ProxyType: Internet
-            Type: HTTP
-            URL: ~{srv-api/srv-url}
-          - Authentication: NoAuthentication
-            Name: ui5
-            ProxyType: Internet
-            Type: HTTP
-            URL: https://ui5.sap.com
-          - Authentication: NoAuthentication
-            HTML5.DynamicDestination: true
-            HTML5.ForwardAuthToken: true
-            Name: trial-cap-srv-api
-            ProxyType: Internet
-            Type: HTTP
-            URL: ~{srv-api/srv-url}
+            - Name: trial-cap-html5-repository
+              ServiceInstanceName: trial-cap-html5-repo-host
+              ServiceKeyName: trial-cap-html5-repo-host-key
+              sap.cloud.service: trialcap.service
+            - Authentication: OAuth2UserTokenExchange
+              Name: trial-cap-auth
+              ServiceInstanceName: trial-cap-auth
+              ServiceKeyName: trial-cap-auth-key
+              sap.cloud.service: trialcap.service
           existing_destinations_policy: update
-    service: destination
-    service-plan: lite
-  requires:
-  - name: srv-api
-    group: destinations
+    build-parameters:
+      no-source: true
+  - name: ormobtpui5app
+    type: html5
+    path: app/ui5-app
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm install
+        - npm run build:cf
+      supported-platforms: []
+resources:
+  - name: trial-cap-auth
+    type: org.cloudfoundry.managed-service
+    parameters:
+      config:
+        tenant-mode: dedicated
+        xsappname: trial-cap-${org}-${space}
+      path: ./xs-security.json
+      service: xsuaa
+      service-plan: application
+  - name: trial-cap-db
+    type: com.sap.xs.hdi-container
+    parameters:
+      service: hana
+      service-plan: hdi-shared
     properties:
-      forwardAuthToken: true
-      name: srv-api
-      url: ~{srv-url}
-- name: trial-cap-html5-repo-host
-  type: org.cloudfoundry.managed-service
-  parameters:
-    service: html5-apps-repo
-    service-plan: app-host
-- name: trial-cap-html5-runtime
-  type: org.cloudfoundry.managed-service
-  parameters:
-    service: html5-apps-repo
-    service-plan: app-runtime
+      hdi-container-name: ${service-name}
+  - name: trial-cap-connectivity
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: connectivity
+      service-plan: lite
+  - name: trial-cap-destination
+    type: org.cloudfoundry.managed-service
+    parameters:
+      config:
+        HTML5Runtime_enabled: true
+        init_data:
+          instance:
+            destinations:
+              - Authentication: NoAuthentication
+                HTML5.DynamicDestination: true
+                HTML5.ForwardAuthToken: true
+                Name: srv-api
+                ProxyType: Internet
+                Type: HTTP
+                URL: ~{srv-api/srv-url}
+              - Authentication: NoAuthentication
+                Name: ui5
+                ProxyType: Internet
+                Type: HTTP
+                URL: https://ui5.sap.com
+              - Authentication: NoAuthentication
+                HTML5.DynamicDestination: true
+                HTML5.ForwardAuthToken: true
+                Name: trial-cap-srv-api
+                ProxyType: Internet
+                Type: HTTP
+                URL: ~{srv-api/srv-url}
+            existing_destinations_policy: update
+      service: destination
+      service-plan: lite
+    requires:
+      - name: srv-api
+        group: destinations
+        properties:
+          forwardAuthToken: true
+          name: srv-api
+          url: ~{srv-url}
+  - name: trial-cap-html5-repo-host
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-plan: app-host
+  - name: trial-cap-html5-runtime
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-plan: app-runtime
 parameters:
   deploy_mode: html5-repo
   enable-parallel-deployments: true
 build-parameters:
   before-all:
-  - builder: custom
-    commands:
-    - npm ci
-    - npx cds build --production
+    - builder: custom
+      commands:
+        - npm ci
+        - npx cds build --production
